@@ -26,8 +26,6 @@ public class IDLogger extends JavaPlugin implements Listener {
 
 		config = new ConfigManager(this);
 
-		System.out.println(getConfig().getBoolean("useMySQL", false));
-
 		if (config.usingMySQL()) {
 			db = new MySQLManager(this);
 		} else {
