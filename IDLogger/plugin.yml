@@ -1,7 +1,7 @@
 name: IDLogger
 version: 1.0
-description: System for logging a player's current name and uuid
-author: arif240
-website: smeefgaming.com
+description: System for logging a player's current name and UUID
+author: smeef
+website: https://github.com/arif-banai
 
 main: me.arifBanai.idLogger.IDLogger
