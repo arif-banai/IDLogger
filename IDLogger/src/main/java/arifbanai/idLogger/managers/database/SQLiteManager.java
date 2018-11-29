@@ -1,27 +1,23 @@
-package me.arifBanai.idLogger.managers.database;
+package main.java.arifbanai.idLogger.managers.database;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.huskehhh.bukkitSQL.mysql.MySQL;
+import main.java.huskehhh.bukkitSQL.sqlite.SQLite;
 
-import me.arifBanai.idLogger.managers.ConfigManager;
+public class SQLiteManager extends DatabaseManager {
 
-public class MySQLManager extends DatabaseManager {
-
-	public MySQLManager(final JavaPlugin plugin) {
-		super(plugin);
+	public SQLiteManager(final JavaPlugin instance) {
+		super(instance);
 	}
 
 	@Override
 	public void setupDb() throws ClassNotFoundException, SQLException {
-		ConfigManager config = new ConfigManager(plugin);
+		System.out.println(plugin.getDataFolder().toPath().toString());
 
-		db = new MySQL(plugin, config.getHost(), config.getPort(), config.getDatabase(), config.getUsername(),
-				config.getPassword());
+		db = new SQLite(plugin, "IDLogger.db");
 		db.openConnection();
 		
 		Statement statement = db.getConnection().createStatement();
@@ -38,7 +34,6 @@ public class MySQLManager extends DatabaseManager {
 
 	@Override
 	public void closeDb() throws SQLException {
-		plugin.getLogger().log(Level.INFO, "Disconnecting MySQL");
 		db.closeConnection();
 	}
 }

@@ -1,4 +1,4 @@
-package com.huskehhh.bukkitSQL;
+package main.java.huskehhh.bukkitSQL;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

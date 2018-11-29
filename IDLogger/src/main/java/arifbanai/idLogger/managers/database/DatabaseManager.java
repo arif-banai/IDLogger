@@ -1,4 +1,4 @@
-package me.arifBanai.idLogger.managers.database;
+package main.java.arifbanai.idLogger.managers.database;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -6,9 +6,8 @@ import java.sql.SQLException;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.huskehhh.bukkitSQL.Database;
-
-import me.arifBanai.idLogger.objects.LoggedPlayer;
+import main.java.arifbanai.idLogger.objects.LoggedPlayer;
+import main.java.huskehhh.bukkitSQL.Database;
 
 
 public abstract class DatabaseManager {

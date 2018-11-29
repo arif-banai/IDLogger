@@ -1,4 +1,4 @@
-package com.huskehhh.bukkitSQL.mysql;
+package main.java.huskehhh.bukkitSQL.mysql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 import org.bukkit.plugin.Plugin;
 
-import com.huskehhh.bukkitSQL.Database;
+import main.java.huskehhh.bukkitSQL.Database;
 
 //MySQL database
 public class MySQL extends Database {

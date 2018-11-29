@@ -4,4 +4,4 @@ description: System for logging a player's current name and UUID
 author: smeef
 website: https://github.com/arif-banai
 
-main: me.arifBanai.idLogger.IDLogger
+main: main.java.arifbanai.idLogger.IDLogger

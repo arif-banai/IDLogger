@@ -1,4 +1,4 @@
-package com.huskehhh.bukkitSQL.sqlite;
+package main.java.huskehhh.bukkitSQL.sqlite;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.util.logging.Level;
 
 import org.bukkit.plugin.Plugin;
 
-import com.huskehhh.bukkitSQL.Database;
+import main.java.huskehhh.bukkitSQL.Database;
 
 //SQLite Database; Stored as file locally
 public class SQLite extends Database {

@@ -1,4 +1,4 @@
-package me.arifBanai.idLogger;
+package main.java.arifbanai.idLogger;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -10,10 +10,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.arifBanai.idLogger.managers.ConfigManager;
-import me.arifBanai.idLogger.managers.database.DatabaseManager;
-import me.arifBanai.idLogger.managers.database.MySQLManager;
-import me.arifBanai.idLogger.managers.database.SQLiteManager;
+import main.java.arifbanai.idLogger.managers.ConfigManager;
+import main.java.arifbanai.idLogger.managers.database.DatabaseManager;
+import main.java.arifbanai.idLogger.managers.database.MySQLManager;
+import main.java.arifbanai.idLogger.managers.database.SQLiteManager;
 
 public class IDLogger extends JavaPlugin implements Listener {
 

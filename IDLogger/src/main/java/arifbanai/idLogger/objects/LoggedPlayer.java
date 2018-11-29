@@ -1,4 +1,4 @@
-package me.arifBanai.idLogger.objects;
+package main.java.arifbanai.idLogger.objects;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

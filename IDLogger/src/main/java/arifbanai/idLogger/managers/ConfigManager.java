@@ -1,4 +1,4 @@
-package me.arifBanai.idLogger.managers;
+package main.java.arifbanai.idLogger.managers;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
