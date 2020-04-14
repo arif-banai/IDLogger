@@ -27,13 +27,12 @@ public abstract class DatabaseManager {
 	}
 
 	public String getNameByUUID(String playerUUID) throws SQLException {
-
 		PreparedStatement safeStatement;
 		safeStatement = db.getConnection().prepareStatement("SELECT playerName FROM players WHERE "
 				+ "playerUUID = ? ");
-		
+
 		safeStatement.setString(1, playerUUID);
-		
+
 		return LoggedPlayer.getName(safeStatement.executeQuery());
 	}
 
