@@ -1,5 +1,6 @@
 package me.arifbanai.idLogger.managers.database;
 
+import me.arifbanai.idLogger.exceptions.PlayerNotFoundException;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
 import me.huskehhh.bukkitSQL.Database;
 import org.bukkit.entity.Player;
@@ -8,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+//TODO Initialize PreparedStatement(s) inside constructor and declare as field.
 
 public abstract class DatabaseManager {
 	
@@ -26,7 +28,7 @@ public abstract class DatabaseManager {
 		return db.getConnection() != null;
 	}
 
-	public String getNameByUUID(String playerUUID) throws SQLException {
+	public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotFoundException {
 		PreparedStatement safeStatement;
 		safeStatement = db.getConnection().prepareStatement("SELECT playerName FROM players WHERE "
 				+ "playerUUID = ? ");
@@ -36,7 +38,7 @@ public abstract class DatabaseManager {
 		return LoggedPlayer.getName(safeStatement.executeQuery());
 	}
 
-	public String getUUIDByName(String playerName) throws SQLException {
+	public String getUUIDByName(String playerName) throws SQLException, PlayerNotFoundException {
 		
 		PreparedStatement safeStatement;
 		safeStatement = db.getConnection().prepareStatement("SELECT playerUUID FROM players WHERE "
@@ -44,14 +46,7 @@ public abstract class DatabaseManager {
 		
 		safeStatement.setString(1, playerName);
 		
-		String targetUUID = "";
-		targetUUID = LoggedPlayer.findUUID(safeStatement.executeQuery());
-		
-		if(targetUUID.equals("NaN")) {
-			return null;
-		}
-
-		return targetUUID;
+		return LoggedPlayer.findUUID(safeStatement.executeQuery());
 	}
 
 	public void addPlayer(Player player) throws SQLException, ClassNotFoundException {

@@ -1,5 +1,6 @@
 package me.arifbanai.idLogger.objects;
 
+import me.arifbanai.idLogger.exceptions.PlayerNotFoundException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -29,22 +30,30 @@ public class LoggedPlayer {
 		return playerUUID;
 	}
 
-	public static String findUUID(ResultSet result) throws SQLException {
+	public static String findUUID(ResultSet result) throws SQLException, PlayerNotFoundException {
 		while (result.next()) {
 			String playerUUID = result.getString("playerUUID");
+			if(playerUUID == null) {
+				throw new PlayerNotFoundException();
+			}
 			return playerUUID;
 		}
 
-		return "NaN";
+		throw new PlayerNotFoundException();
 	}
 	
-	public static String getName(ResultSet result) throws SQLException {
+	public static String getName(ResultSet result) throws SQLException, PlayerNotFoundException {
 		while (result.next()) {
 			String playerName = result.getString("playerName");
+
+			if(playerName == null) {
+				throw new PlayerNotFoundException();
+			}
+
 			return playerName;
 		}
 
-		return "NaN";
+		throw new PlayerNotFoundException();
 	}
 
 }

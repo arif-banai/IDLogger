@@ -3,9 +3,7 @@ package me.huskehhh.bukkitSQL;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 // Parent class for all database types
 public abstract class Database {
@@ -40,27 +38,4 @@ public abstract class Database {
 		return connection;
 	}
 
-	// Execute a query and return a ResultSet
-	public ResultSet querySQL(String query) throws SQLException, ClassNotFoundException {
-		if (!checkConnection())
-			openConnection();
-
-		Statement statement = connection.createStatement();
-
-		ResultSet result = statement.executeQuery(query);
-
-		return result;
-	}
-
-	// Execute an update, return status
-	public int updateSQL(String query) throws SQLException, ClassNotFoundException {
-		if (!checkConnection())
-			openConnection();
-
-		Statement statement = connection.createStatement();
-
-		int result = statement.executeUpdate(query);
-
-		return result;
-	}
 }

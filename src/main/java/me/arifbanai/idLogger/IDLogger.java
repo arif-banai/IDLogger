@@ -1,5 +1,6 @@
 package me.arifbanai.idLogger;
 
+import me.arifbanai.idLogger.exceptions.PlayerNotFoundException;
 import me.arifbanai.idLogger.managers.ConfigManager;
 import me.arifbanai.idLogger.managers.database.DatabaseManager;
 import me.arifbanai.idLogger.managers.database.MySQLManager;
@@ -70,30 +71,36 @@ public class IDLogger extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent e) {
-		Player player = e.getPlayer();
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		Player player = event.getPlayer();
 
 		try {
 			String name = db.getNameByUUID(player.getUniqueId().toString());
 
-			if (name.equals("NaN")) {
-				db.addPlayer(player);
-			} else if (!name.equals(player.getName())) {
+			if (!name.equals(player.getName())) {
 				db.updatePlayerName(player);
 			}
-		} catch (ClassNotFoundException | SQLException e1) {
-			this.getLogger().severe("Unable to handle a PlayerJoinEvent! SQLException.");
-			e1.printStackTrace();
+		} catch (PlayerNotFoundException e) {
+			try {
+				db.addPlayer(player);
+			} catch (SQLException | ClassNotFoundException throwables) {
+				this.getLogger().severe("Unable to addPlayer.");
+				e.printStackTrace();
+				this.getServer().getPluginManager().disablePlugin(this);
+			}
+		} catch (ClassNotFoundException | SQLException e) {
+			this.getLogger().severe("Unable to getNameByUUID or updatePlayerName");
+			e.printStackTrace();
 			this.getServer().getPluginManager().disablePlugin(this);
 		}
 
 	}
 	
-	public String getNameByUUID(String playerUUID) throws SQLException {
+	public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotFoundException {
 		return db.getNameByUUID(playerUUID);
 	}
 	
-	public String getUUIDByName(String playerName) throws SQLException {
+	public String getUUIDByName(String playerName) throws SQLException, PlayerNotFoundException {
 		return db.getUUIDByName(playerName);
 	}
 
