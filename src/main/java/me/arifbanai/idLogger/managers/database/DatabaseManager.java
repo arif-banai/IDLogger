@@ -1,6 +1,6 @@
 package me.arifbanai.idLogger.managers.database;
 
-import me.arifbanai.idLogger.exceptions.PlayerNotFoundException;
+import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
 import me.huskehhh.bukkitSQL.Database;
@@ -30,7 +30,7 @@ public abstract class DatabaseManager {
 		return db.getConnection() != null;
 	}
 
-	public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotFoundException {
+	public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotIDLoggedException {
 		PreparedStatement safeStatement;
 		safeStatement = db.getConnection().prepareStatement("SELECT playerName FROM players WHERE "
 				+ "playerUUID = ? ");
@@ -40,7 +40,7 @@ public abstract class DatabaseManager {
 		return LoggedPlayer.getName(safeStatement.executeQuery());
 	}
 
-	public String getUUIDByName(String playerName) throws SQLException, PlayerNotFoundException {
+	public String getUUIDByName(String playerName) throws SQLException, PlayerNotIDLoggedException {
 		
 		PreparedStatement safeStatement;
 		safeStatement = db.getConnection().prepareStatement("SELECT playerUUID FROM players WHERE "
@@ -100,7 +100,7 @@ public abstract class DatabaseManager {
 							IDLoggerCallback.onSuccess(playerUUID);
 						}
 					});
-				} catch (PlayerNotFoundException | SQLException e) {
+				} catch (PlayerNotIDLoggedException | SQLException e) {
 					IDLoggerCallback.onFailure(e);
 				}
 			}
@@ -119,7 +119,7 @@ public abstract class DatabaseManager {
 							IDLoggerCallback.onSuccess(playerName);
 						}
 					});
-				} catch (SQLException | PlayerNotFoundException e) {
+				} catch (SQLException | PlayerNotIDLoggedException e) {
 					IDLoggerCallback.onFailure(e);
 				}
 			}

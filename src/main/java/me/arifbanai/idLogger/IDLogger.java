@@ -1,6 +1,6 @@
 package me.arifbanai.idLogger;
 
-import me.arifbanai.idLogger.exceptions.PlayerNotFoundException;
+import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.managers.ConfigManager;
 import me.arifbanai.idLogger.managers.database.DatabaseManager;
@@ -81,7 +81,7 @@ public class IDLogger extends JavaPlugin implements Listener {
 			if (!name.equals(player.getName())) {
 				db.updatePlayerName(player);
 			}
-		} catch (PlayerNotFoundException e) {
+		} catch (PlayerNotIDLoggedException e) {
 			try {
 				db.addPlayer(player);
 			} catch (SQLException | ClassNotFoundException throwables) {
