@@ -1,7 +1,7 @@
 package me.arifbanai.idLogger;
 
 import me.arifbanai.idLogger.exceptions.PlayerNotFoundException;
-import me.arifbanai.idLogger.interfaces.Callback;
+import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.managers.ConfigManager;
 import me.arifbanai.idLogger.managers.database.DatabaseManager;
 import me.arifbanai.idLogger.managers.database.MySQLManager;
@@ -97,11 +97,11 @@ public class IDLogger extends JavaPlugin implements Listener {
 
 	}
 
-	public void doAsyncNameLookup(String playerUUID, final Callback<String> callback) {
-		db.doAsyncNameLookup(playerUUID, callback);
+	public void doAsyncNameLookup(String playerUUID, final IDLoggerCallback<String> IDLoggerCallback) {
+		db.doAsyncNameLookup(playerUUID, IDLoggerCallback);
 	}
 
-	public void doAsyncUUIDLookup(String playerName, final Callback<String> callback) {
-		db.doAsyncUUIDLookup(playerName, callback);
+	public void doAsyncUUIDLookup(String playerName, final IDLoggerCallback<String> IDLoggerCallback) {
+		db.doAsyncUUIDLookup(playerName, IDLoggerCallback);
 	}
 }
