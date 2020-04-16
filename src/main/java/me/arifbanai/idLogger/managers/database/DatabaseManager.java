@@ -1,8 +1,10 @@
 package me.arifbanai.idLogger.managers.database;
 
 import me.arifbanai.idLogger.exceptions.PlayerNotFoundException;
+import me.arifbanai.idLogger.interfaces.Callback;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
 import me.huskehhh.bukkitSQL.Database;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -84,6 +86,44 @@ public abstract class DatabaseManager {
 		safeStatement.setString(2, player.getUniqueId().toString());
 		
 		safeStatement.executeUpdate();
+	}
+
+	public void doAsyncUUIDLookup(final String playerName, final Callback<String> callback) {
+		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final String playerUUID = getUUIDByName(playerName);
+					Bukkit.getScheduler().runTask(plugin, new Runnable() {
+						@Override
+						public void run() {
+							callback.onSuccess(playerUUID);
+						}
+					});
+				} catch (PlayerNotFoundException | SQLException e) {
+					callback.onFailure(e);
+				}
+			}
+		});
+	}
+
+	public void doAsyncNameLookup(final String playerUUID, final Callback<String> callback) {
+		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final String playerName = getNameByUUID(playerUUID);
+					Bukkit.getScheduler().runTask(plugin, new Runnable() {
+						@Override
+						public void run() {
+							callback.onSuccess(playerName);
+						}
+					});
+				} catch (SQLException | PlayerNotFoundException e) {
+					callback.onFailure(e);
+				}
+			}
+		});
 	}
 	
 }

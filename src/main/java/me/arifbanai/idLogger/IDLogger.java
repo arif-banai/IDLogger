@@ -95,13 +95,4 @@ public class IDLogger extends JavaPlugin implements Listener {
 		}
 
 	}
-	
-	public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotFoundException {
-		return db.getNameByUUID(playerUUID);
-	}
-	
-	public String getUUIDByName(String playerName) throws SQLException, PlayerNotFoundException {
-		return db.getUUIDByName(playerName);
-	}
-
 }
