@@ -1,4 +1,4 @@
-using-mysql: true
+using-mysql: false
 MySQL:
   host: localhost
   port: 3306
