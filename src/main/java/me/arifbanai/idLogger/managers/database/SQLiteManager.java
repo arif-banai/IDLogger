@@ -28,12 +28,17 @@ public class SQLiteManager extends DatabaseManager {
 				+ ");");
 
 		statement.executeUpdate("CREATE INDEX IF NOT EXISTS indexNames on players (playerName);");
-		
+
+
 		statement.close();
+
+		setupPreparedStatements();
 	}
 
 	@Override
 	public void closeDb() throws SQLException {
 		db.closeConnection();
 	}
+
+
 }

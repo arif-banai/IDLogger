@@ -77,26 +77,46 @@ public class IDLogger extends JavaPlugin implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 
-		try {
-			String name = db.getNameByUUID(player.getUniqueId().toString());
+		doAsyncNameLookup(player.getUniqueId().toString(), new IDLoggerCallback<String>() {
+			@Override
+			public void onSuccess(String result) {
+				String name = result;
 
-			if (!name.equals(player.getName())) {
-				db.updatePlayerName(player);
-			}
-		} catch (PlayerNotIDLoggedException e) {
-			try {
-				db.addPlayer(player);
-			} catch (SQLException | ClassNotFoundException throwables) {
-				this.getLogger().severe("Unable to addPlayer.");
-				e.printStackTrace();
-				this.getServer().getPluginManager().disablePlugin(this);
-			}
-		} catch (ClassNotFoundException | SQLException e) {
-			this.getLogger().severe("Unable to getNameByUUID or updatePlayerName");
-			e.printStackTrace();
-			this.getServer().getPluginManager().disablePlugin(this);
-		}
+				if (!name.equals(player.getName())) {
+					db.doAsyncUpdatePlayerName(player.getUniqueId(), player.getName(), new IDLoggerCallback<Void>() {
+						@Override
+						public void onSuccess(Void result) {
 
+						}
+
+						@Override
+						public void onFailure(Throwable cause) {
+							handleSqlError((Exception) cause, "AsyncUpdatePlayer callback");
+						}
+					});
+				}
+			}
+
+			@Override
+			public void onFailure(Throwable cause) {
+				if(cause instanceof PlayerNotIDLoggedException) {
+					db.doAsyncAddPlayer(player.getUniqueId(), player.getName(), new IDLoggerCallback<Void>() {
+						@Override
+						public void onSuccess(Void result) {
+
+						}
+
+						@Override
+						public void onFailure(Throwable cause) {
+							handleSqlError((Exception) cause, "AsyncAddPlayer callback");
+						}
+					});
+					return;
+				}
+
+				handleSqlError((Exception) cause, "AsyncNameLookup callback");
+			}
+		});
 	}
 
 	public void doAsyncNameLookup(String playerUUID, final IDLoggerCallback<String> IDLoggerCallback) {
@@ -105,5 +125,11 @@ public class IDLogger extends JavaPlugin implements Listener {
 
 	public void doAsyncUUIDLookup(String playerName, final IDLoggerCallback<String> IDLoggerCallback) {
 		db.doAsyncUUIDLookup(playerName, IDLoggerCallback);
+	}
+
+	protected void handleSqlError(Exception e, String methodOccurred) {
+		this.getLogger().severe("An SQLException occurred in " + methodOccurred);
+		e.printStackTrace();
+		this.getServer().getPluginManager().disablePlugin(this);
 	}
 }

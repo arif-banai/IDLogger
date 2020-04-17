@@ -32,6 +32,8 @@ public class MySQLManager extends DatabaseManager {
 				+ ");");
 		
 		statement.close();
+
+		setupPreparedStatements();
 	}
 
 	@Override
