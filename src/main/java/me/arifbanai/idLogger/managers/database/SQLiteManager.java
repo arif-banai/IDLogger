@@ -24,9 +24,10 @@ public class SQLiteManager extends DatabaseManager {
 		statement.executeUpdate("CREATE TABLE IF NOT EXISTS players ("
 				+ "playerUUID VARCHAR(40) NOT NULL,"
 				+ "playerName VARCHAR(40) NOT NULL,"
-				+ "PRIMARY KEY(playerUUID),"
-				+ "KEY (playerName)"
+				+ "PRIMARY KEY(playerUUID)"
 				+ ");");
+
+		statement.executeUpdate("CREATE INDEX IF NOT EXISTS indexNames on players (playerName);");
 		
 		statement.close();
 	}

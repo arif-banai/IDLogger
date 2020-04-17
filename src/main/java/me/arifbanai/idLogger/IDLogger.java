@@ -9,6 +9,7 @@ import me.arifbanai.idLogger.managers.database.SQLiteManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -69,6 +70,7 @@ public class IDLogger extends JavaPlugin implements Listener {
 			//Nothing, the plugin is being disabled
 		}
 
+		HandlerList.unregisterAll((JavaPlugin) this);
 	}
 
 	@EventHandler
