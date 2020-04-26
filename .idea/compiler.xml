@@ -6,11 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="idlogger" />
         <module name="IDLogger" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="IDLogger" target="1.8" />
+      <module name="idlogger" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

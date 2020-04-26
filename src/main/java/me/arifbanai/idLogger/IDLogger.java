@@ -1,11 +1,10 @@
 package me.arifbanai.idLogger;
 
+import me.arifbanai.idLogger.datasource.DataSourceManager;
 import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.managers.ConfigManager;
-import me.arifbanai.idLogger.managers.database.DatabaseManager;
-import me.arifbanai.idLogger.managers.database.MySQLManager;
-import me.arifbanai.idLogger.managers.database.SQLiteManager;
+import me.arifbanai.idLogger.managers.QueryManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +18,8 @@ import java.util.logging.Level;
 
 public class IDLogger extends JavaPlugin implements Listener {
 
-	private DatabaseManager db;
+	private QueryManager db;
+	private DataSourceManager dataSourceManager;
 	private ConfigManager config;
 
 	@Override
@@ -27,34 +27,13 @@ public class IDLogger extends JavaPlugin implements Listener {
 		this.saveDefaultConfig();
 
 		config = new ConfigManager(this);
+		dataSourceManager = new DataSourceManager(this);
+		db =  new QueryManager(this, dataSourceManager);
 
-		if (config.usingMySQL()) {
-			db = new MySQLManager(this);
-		} else {
-			db = new SQLiteManager(this);
-		}
-
-		if (config.usingMySQL()) {
-			System.out.println("MYSQL");
-			db = new MySQLManager(this);
-			try {
-				db.setupDb();
-			} catch (ClassNotFoundException | SQLException e) {
-				this.getLogger().log(Level.SEVERE, "Unable to connect to MySQL. Displaying stack-trace.");
-				e.printStackTrace();
-				this.getServer().getPluginManager().disablePlugin(this);
-			}
-		} else {
-			db = new SQLiteManager(this);
-
-			try {
-				System.out.println("SQLite");
-				db.setupDb();
-			} catch (ClassNotFoundException | SQLException e) {
-				this.getLogger().log(Level.SEVERE, "Unable to use SQLite. Displaying stack-trace.");
-				e.printStackTrace();
-				this.getServer().getPluginManager().disablePlugin(this);
-			}
+		try {
+			db.prepareDB();
+		} catch (SQLException exception) {
+			handleSqlError(exception, "onEnable");
 		}
 
 		getServer().getPluginManager().registerEvents(this, this);
@@ -119,6 +98,10 @@ public class IDLogger extends JavaPlugin implements Listener {
 		});
 	}
 
+	public ConfigManager getConfigManager() {
+		return config;
+	}
+
 	public void doAsyncNameLookup(String playerUUID, final IDLoggerCallback<String> IDLoggerCallback) {
 		db.doAsyncNameLookup(playerUUID, IDLoggerCallback);
 	}
@@ -128,7 +111,7 @@ public class IDLogger extends JavaPlugin implements Listener {
 	}
 
 	protected void handleSqlError(Exception e, String methodOccurred) {
-		this.getLogger().severe("An SQLException occurred in " + methodOccurred);
+		this.getLogger().severe("An SQLException occurred in IDLogger::" + methodOccurred);
 		e.printStackTrace();
 		this.getServer().getPluginManager().disablePlugin(this);
 	}
