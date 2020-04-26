@@ -1,12 +1,9 @@
 package me.arifbanai.idLogger.datasource;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import me.arifbanai.idLogger.IDLogger;
 import me.arifbanai.idLogger.managers.ConfigManager;
-import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
-import javax.sql.ConnectionPoolDataSource;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
