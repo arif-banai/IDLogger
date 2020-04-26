@@ -9,7 +9,6 @@ import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 import javax.sql.ConnectionPoolDataSource;
 import java.beans.PropertyVetoException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -37,17 +36,15 @@ public class DataSourceManager {
      *
      * @param plugin Reference to the main {@link IDLogger} class
      */
-    public DataSourceManager(final IDLogger plugin) {
+    public DataSourceManager(final IDLogger plugin, final ConfigManager configMan) {
 
-        String path = plugin.getDataFolder().getAbsolutePath();
+        String path = "drivers.properties";
 
-        String dbPropertiesPath = path + "c3po.properties";
         Properties dbProperties = new Properties();
-
         try {
-            dbProperties.load(new FileInputStream(dbPropertiesPath));
+            dbProperties.load(plugin.getResource(path));
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Cannot read c3po.properties. Shutting down...");
+            plugin.getLogger().log(Level.SEVERE, "Cannot read " + path + " | Shutting down...");
             e.printStackTrace();
             plugin.getPluginLoader().disablePlugin(plugin);
         }
@@ -57,24 +54,21 @@ public class DataSourceManager {
         String factoryClassName = "";
         String host;
         String db;
-        ConnectionPoolDataSource pds;
 
-        ConfigManager configMan = plugin.getConfigManager();
         if(configMan.usingMySQL()) {
             dataSourceType = DataSourceType.MYSQL;
             driverClassName = dbProperties.getProperty("mysql-driver-class");
-            dbType = "mysql";
-            host = configMan.getHost();
+            dbType = "mysql://";
+            host = configMan.getHost() + ":" + configMan.getPort();
             db = configMan.getDatabase();
             factoryClassName = dbProperties.getProperty("mysql-factory-class");
-            pds = new MysqlConnectionPoolDataSource();
+
         } else {
             dataSourceType = DataSourceType.SQLITE;
             driverClassName = dbProperties.getProperty("sqlite-driver-class");
-            dbType = "sqlite";
-            db = "IDLogger.db";
+            dbType = "sqlite:";
             host = plugin.getDataFolder().toPath().toString();
-            pds = new SQLiteConnectionPoolDataSource();
+            db = "IDLogger.db";
 
             File file = new File(plugin.getDataFolder(), db);
 
@@ -89,13 +83,12 @@ public class DataSourceManager {
             }
         }
 
-        String url = "jdbc:" + dbType + "://" + host + "/" + db;
+        String url = "jdbc:" + dbType + host + "/" + db;
 
         cpds = new ComboPooledDataSource();
 
         try {
             cpds.setDriverClass(driverClassName);
-            cpds.setConnectionPoolDataSource(pds);
         } catch (PropertyVetoException e) {
             plugin.getLogger().severe("Unable to set Driver class/set ConnectionPoolDataSource. Shutting down...");
             e.printStackTrace();

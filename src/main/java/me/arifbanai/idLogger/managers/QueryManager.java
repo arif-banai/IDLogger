@@ -44,7 +44,7 @@ public class QueryManager {
 		}
 	}
 
-	public void closeDb() throws SQLException {
+	public void close() {
 		plugin.getLogger().log(Level.INFO, "Disconnecting data source...");
 		dataSourceManager.close();
 	}
