@@ -1,7 +1,13 @@
-using-mysql: false
-MySQL:
+using-sqlite: true
+db:
   host: localhost
   port: 3306
-  database: minecraft
+  schema: minecraft
   username: root
   password: password
+  dialect: mysql
+# Valid dialects:
+# mysql
+# TODO Support postgres
+# TODO Support optional caching using redis/memcached
+# TODO Support h2 AND sqlite

@@ -1,7 +1,7 @@
 package me.arifbanai.idLogger.managers;
 
-import me.arifbanai.idLogger.datasource.DataSourceManager;
-import me.arifbanai.idLogger.datasource.DataSourceType;
+import me.arifbanai.easypool.DataSourceManager;
+import me.arifbanai.easypool.enums.DataSourceType;
 import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
@@ -10,7 +10,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.*;
 import java.util.UUID;
-import java.util.logging.Level;
 
 /**
  * <p>Represents a generic query manager for some SQL DB implementation.</p>
@@ -45,7 +44,7 @@ public class QueryManager {
 	}
 
 	public void close() {
-		plugin.getLogger().log(Level.INFO, "Disconnecting data source...");
+		plugin.getLogger().info("Disconnecting data source...");
 		dataSourceManager.close();
 	}
 
