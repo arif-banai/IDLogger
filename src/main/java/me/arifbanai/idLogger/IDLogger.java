@@ -68,9 +68,8 @@ public class IDLogger extends JavaPlugin implements Listener {
 		doAsyncNameLookup(player.getUniqueId().toString(), new IDLoggerCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
-				String name = result;
 
-				if (!name.equals(player.getName())) {
+				if (!result.equals(player.getName())) {
 					queryManager.doAsyncUpdatePlayerName(player.getUniqueId(), player.getName(), new IDLoggerCallback<Void>() {
 						@Override
 						public void onSuccess(Void result) {
@@ -78,15 +77,15 @@ public class IDLogger extends JavaPlugin implements Listener {
 						}
 
 						@Override
-						public void onFailure(Throwable cause) {
-							handleUnexpectedException((Exception) cause, "AsyncUpdatePlayer callback");
+						public void onFailure(Exception cause) {
+							handleUnexpectedException(cause, "AsyncUpdatePlayer callback");
 						}
 					});
 				}
 			}
 
 			@Override
-			public void onFailure(Throwable cause) {
+			public void onFailure(Exception cause) {
 				if(cause instanceof PlayerNotIDLoggedException) {
 					queryManager.doAsyncAddPlayer(player.getUniqueId(), player.getName(), new IDLoggerCallback<Void>() {
 						@Override
@@ -95,14 +94,14 @@ public class IDLogger extends JavaPlugin implements Listener {
 						}
 
 						@Override
-						public void onFailure(Throwable cause) {
-							handleUnexpectedException((Exception) cause, "AsyncAddPlayer callback");
+						public void onFailure(Exception cause) {
+							handleUnexpectedException(cause, "AsyncAddPlayer callback");
 						}
 					});
 					return;
 				}
 
-				handleUnexpectedException((Exception) cause, "AsyncNameLookup callback");
+				handleUnexpectedException(cause, "AsyncNameLookup callback");
 			}
 		});
 	}
