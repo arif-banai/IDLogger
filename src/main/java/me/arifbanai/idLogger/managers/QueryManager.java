@@ -12,7 +12,7 @@ import java.sql.*;
 import java.util.UUID;
 
 /**
- * <p>Represents a generic query manager for some SQL DB implementation.</p>
+ * Represents a generic query manager for some SQL DB implementation.
  *
  * @since 4/26/2020 3:38AM, EST
  * @author Arif Banai

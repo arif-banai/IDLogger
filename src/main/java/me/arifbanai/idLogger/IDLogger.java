@@ -19,7 +19,7 @@ import java.sql.SQLException;
 
 /**
  * The main class for this plugin. Also the listener for all events processed by this plugin.
- *
+ * <p>
  * TODO Implement caching for players who have recently played, in order to reduce DB calls.
  *
  * @since 5/1/2020 1:54AM
