@@ -19,3 +19,10 @@ This plugin can utilize a MySQL or SQLite DB, as configurable in config.yml, to 
 
 ## TODO
 * Implement caching of UUID/name pair for player's who have recently played to reduce DB calls.
+
+**Changelog**
+
+- **2/11/2021**
+    - Added comment explaining usage of "hikari.configurationFile" system property
+    - Updated .gitignore and removed ignored files
+    - Updated EasyPool dependency
