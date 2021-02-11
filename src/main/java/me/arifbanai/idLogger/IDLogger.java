@@ -3,9 +3,11 @@ package me.arifbanai.idLogger;
 import me.arifbanai.easypool.DataSourceManager;
 import me.arifbanai.easypool.MySQLDataSourceManager;
 import me.arifbanai.easypool.SQLiteDataSourceManager;
+import me.arifbanai.easypool.enums.DataSourceType;
 import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.managers.QueryManager;
+import me.arifbanai.idLogger.managers.sql.SqlQueryManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,17 +17,17 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * The main class for this plugin. Also the listener for all events processed by this plugin.
  * <p>
  * TODO Implement caching for players who have recently played, in order to reduce DB calls.
  *
+ * TODO ^^^ Add some Map to reduce DB calls ^^^
+ *
  * @since 5/1/2020 1:54AM
  * @author Arif Banai
  */
-
 public class IDLogger extends JavaPlugin implements Listener {
 
 	private DataSourceManager dataSourceManager;
@@ -42,16 +44,14 @@ public class IDLogger extends JavaPlugin implements Listener {
 		String path = getDataFolder().toPath().toString();
 		System.setProperty("hikaricp.configurationFile", path + "/hikari.properties");
 
-		if(!initDataSourceManager()) {
-			handleUnexpectedException(new Exception("Failed to initialize DataSourceManager."), "onEnable()");
+		if(!setupDsmAndQueryManager()) {
+			handleUnexpectedException(new Exception("Failed to initialize DataSourceManager."));
 		}
-
-		queryManager =  new QueryManager(this, dataSourceManager);
 
 		try {
 			queryManager.prepareDB();
-		} catch (SQLException exception) {
-			handleUnexpectedException(exception, "prepareDB()");
+		} catch (Exception exception) {
+			handleUnexpectedException(exception);
 		}
 
 		getServer().getPluginManager().registerEvents(this, this);
@@ -60,7 +60,7 @@ public class IDLogger extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		getLogger().info("Disabling plugin...");
-		queryManager.close();
+		dataSourceManager.close();
 		HandlerList.unregisterAll((JavaPlugin) this);
 	}
 
@@ -81,7 +81,7 @@ public class IDLogger extends JavaPlugin implements Listener {
 
 						@Override
 						public void onFailure(Exception cause) {
-							handleUnexpectedException(cause, "AsyncUpdatePlayer callback");
+							handleUnexpectedException(cause);
 						}
 					});
 				}
@@ -98,13 +98,13 @@ public class IDLogger extends JavaPlugin implements Listener {
 
 						@Override
 						public void onFailure(Exception cause) {
-							handleUnexpectedException(cause, "AsyncAddPlayer callback");
+							handleUnexpectedException(cause);
 						}
 					});
 					return;
 				}
 
-				handleUnexpectedException(cause, "AsyncNameLookup callback");
+				handleUnexpectedException(cause);
 			}
 		});
 	}
@@ -117,13 +117,18 @@ public class IDLogger extends JavaPlugin implements Listener {
 		queryManager.doAsyncUUIDLookup(playerName, IDLoggerCallback);
 	}
 
-	protected void handleUnexpectedException(Exception e, String methodOccurred) {
-		this.getLogger().severe(e.toString() + " at " + methodOccurred);
+	protected void handleUnexpectedException(Exception e) {
+		this.getLogger().severe(e.toString());
 		e.printStackTrace();
 		this.getServer().getPluginManager().disablePlugin(this);
 	}
 
-	private boolean initDataSourceManager() {
+	/**
+	 * Setup the DSM with some RDBMS specified in config
+	 * Initialize the {@link QueryManager} with the right DSM implementation
+	 * @return true if setup was successful, false if failed
+	 */
+	private boolean setupDsmAndQueryManager() {
 		FileConfiguration config = getConfig();
 		dataSourceManager = null;
 
@@ -131,8 +136,9 @@ public class IDLogger extends JavaPlugin implements Listener {
 			String path = getDataFolder().toPath().toString();
 			try {
 				dataSourceManager = new SQLiteDataSourceManager(path, this.getName());
+				queryManager = new SqlQueryManager(this, dataSourceManager);
 			} catch (IOException e) {
-				handleUnexpectedException(e, "initDataSourceManager(), SQLite init");
+				handleUnexpectedException(e);
 			}
 		} else {
 			String host = config.getString("db.host");
@@ -140,12 +146,25 @@ public class IDLogger extends JavaPlugin implements Listener {
 			String schema = config.getString("db.schema");
 			String user = config.getString("db.username");
 			String password = config.getString("db.password");
-			//TODO String dialect = config.getString("db.dialect");
-			//TODO Use a switch to handle multiple sql dialects
+			String dialect = config.getString("db.dialect");
 
-			dataSourceManager = new MySQLDataSourceManager(host, port, schema, user, password);
+			if (dialect == null)  {
+				handleUnexpectedException(new Exception("DB dialect is null"));
+				return false;
+			}
+
+			// Use a switch to handle multiple sql dialects
+			switch(DataSourceType.matchDialect(dialect)) {
+				case MYSQL:
+					dataSourceManager = new MySQLDataSourceManager(host, port, schema, user, password);
+					queryManager = new SqlQueryManager(this, dataSourceManager);
+					break;
+				default:
+					handleUnexpectedException(new Exception("Unable to resolve DB dialect"));
+					break;
+			}
 		}
 
-		return dataSourceManager != null;
+		return (dataSourceManager != null && queryManager != null);
 	}
 }

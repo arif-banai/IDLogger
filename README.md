@@ -23,6 +23,12 @@ This plugin can utilize a MySQL or SQLite DB, as configurable in config.yml, to 
 **Changelog**
 
 - **2/11/2021**
-    - Added comment explaining usage of "hikari.configurationFile" system property
-    - Updated .gitignore and removed ignored files
-    - Updated EasyPool dependency
+  - Added comment explaining usage of "hikari.configurationFile" system property
+  - Updated .gitignore and removed ignored files
+  - Updated EasyPool dependency
+  - Abstracted query logic using interfaces and abstract parent class
+  - Grouped initialization of QueryManager and DataSourceManager together, allows for 
+    future additions to supported data sources (postgres, oracle, etc.)
+  - Trimmed private exception handler method
+  
+  

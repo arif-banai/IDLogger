@@ -31,7 +31,7 @@ public class LoggedPlayer {
 	}
 
 	public static String findUUID(ResultSet result) throws SQLException, PlayerNotIDLoggedException {
-		while (result.next()) {
+		if (result.next()) {
 			String playerUUID = result.getString("playerUUID");
 			if(playerUUID == null) {
 				throw new PlayerNotIDLoggedException();
@@ -43,7 +43,7 @@ public class LoggedPlayer {
 	}
 	
 	public static String getName(ResultSet result) throws SQLException, PlayerNotIDLoggedException {
-		while (result.next()) {
+		if (result.next()) {
 			String playerName = result.getString("playerName");
 
 			if(playerName == null) {
