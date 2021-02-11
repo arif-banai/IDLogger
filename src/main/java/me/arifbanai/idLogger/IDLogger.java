@@ -36,6 +36,9 @@ public class IDLogger extends JavaPlugin implements Listener {
 		this.saveDefaultConfig();
 		this.saveResource("hikari.properties", false);
 
+		// Set location of hikari properties file to System property
+		// When HikariConfig default constructor is called, the properties file is loaded
+		// see https://github.com/brettwooldridge/HikariCP (ctrl+F system property)
 		String path = getDataFolder().toPath().toString();
 		System.setProperty("hikaricp.configurationFile", path + "/hikari.properties");
 
