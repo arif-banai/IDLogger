@@ -3,19 +3,33 @@ package me.arifbanai.idLogger.managers.sql;
 import me.arifbanai.easypool.DataSourceManager;
 import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
+import me.arifbanai.idLogger.objects.LoggedPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 public class SqlQueryManager extends SqlQueries {
 
     private final JavaPlugin plugin;
 
-    public SqlQueryManager(JavaPlugin plugin, DataSourceManager dataSourceManager) {
+    public SqlQueryManager(JavaPlugin plugin, DataSourceManager dataSourceManager) throws SQLException {
         super(dataSourceManager);
         this.plugin = plugin;
+    }
+
+    @Override
+    public void doAsyncGetAllLoggedPlayers(IDLoggerCallback<List<LoggedPlayer>> callback) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                final List<LoggedPlayer> loggedPlayers = getAllLoggedPlayers();
+                Bukkit.getScheduler().runTask(plugin, () -> callback.onSuccess(loggedPlayers));
+            } catch (SQLException e) {
+                callback.onFailure(e);
+            }
+        });
     }
 
     @Override

@@ -1,11 +1,22 @@
 package me.arifbanai.idLogger.interfaces;
 
+import me.arifbanai.idLogger.objects.LoggedPlayer;
+
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Async wrapper methods for {@link Queries}
  */
 public interface AsyncQueries extends Queries {
+
+    default void doAsyncGetAllLoggedPlayers(IDLoggerCallback<List<LoggedPlayer>> callback) {
+        try {
+            callback.onSuccess(getAllLoggedPlayers());
+        } catch (Exception e) {
+            callback.onFailure(e);
+        }
+    }
 
     default void doAsyncNameLookup(final String playerUUID, IDLoggerCallback<String> callback) {
         try {

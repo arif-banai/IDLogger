@@ -6,12 +6,14 @@ import me.arifbanai.idLogger.managers.QueryManager;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
 
 import java.sql.*;
+import java.util.List;
 import java.util.UUID;
 
 public class SqlQueries extends QueryManager {
 
-    public SqlQueries(DataSourceManager dataSourceManager) {
+    public SqlQueries(DataSourceManager dataSourceManager) throws SQLException {
         super(dataSourceManager);
+        prepareDB();
     }
 
     @Override
@@ -31,37 +33,44 @@ public class SqlQueries extends QueryManager {
     // Lookup operations
 
     @Override
-    public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotIDLoggedException {
-        String playerName;
+    public List<LoggedPlayer> getAllLoggedPlayers() throws SQLException {
+        String getAllPlayersSQL = "SELECT playerUUID, playerName FROM players";
 
+        try(Connection connection = dataSourceManager.getConnection();
+            PreparedStatement ps = connection.prepareStatement(getAllPlayersSQL)
+        )   {
+            try(ResultSet rs = ps.executeQuery()) {
+                return LoggedPlayer.listPlayers(rs);
+            }
+        }
+    }
+
+    @Override
+    public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotIDLoggedException {
         String getNameByUUIDSQL = "SELECT playerName FROM players WHERE playerUUID = ?";
+
         try(Connection connection = dataSourceManager.getConnection();
             PreparedStatement ps = connection.prepareStatement(getNameByUUIDSQL)
         )  {
             ps.setString(1, playerUUID);
             try(ResultSet rs = ps.executeQuery()) {
-                playerName = LoggedPlayer.getName(rs);
+                return LoggedPlayer.getName(rs);
             }
         }
-
-        return playerName;
     }
 
     @Override
     public String getUUIDByName(String playerName) throws SQLException, PlayerNotIDLoggedException {
-        String playerUUID;
-
         String getUUIDByNameSQL = "SELECT playerUUID FROM players WHERE playerName = ?";
+
         try(Connection connection = dataSourceManager.getConnection();
             PreparedStatement ps = connection.prepareStatement(getUUIDByNameSQL)
         )  {
             ps.setString(1, playerName);
             try(ResultSet rs = ps.executeQuery()) {
-                playerUUID = LoggedPlayer.findUUID(rs);
+                return LoggedPlayer.findUUID(rs);
             }
         }
-
-        return playerUUID;
     }
 
     // Insertion/removal/update operations

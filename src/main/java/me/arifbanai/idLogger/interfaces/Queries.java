@@ -1,5 +1,8 @@
 package me.arifbanai.idLogger.interfaces;
 
+import me.arifbanai.idLogger.objects.LoggedPlayer;
+
+import java.util.List;
 import java.util.UUID;
 
 public interface Queries {
@@ -9,6 +12,8 @@ public interface Queries {
      * @throws Exception some error setting up the DB/pool
      */
     void prepareDB() throws Exception;
+
+    List<LoggedPlayer> getAllLoggedPlayers() throws Exception;
 
     /**
      * The name of the player, given their UUID

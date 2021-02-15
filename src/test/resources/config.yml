@@ -1,0 +1,12 @@
+usingSQLite: false
+db:
+  host: localhost
+  port: 3306
+  schema: minecraft
+  username: root
+  password: #Use command line set property -Dpassword=yourpasshere
+  dialect: mysql
+# Valid dialects:
+# mysql
+# TODO Support postgres
+# TODO maybe redis/h2/memcached?
