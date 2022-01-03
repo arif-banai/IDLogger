@@ -3,6 +3,6 @@ version: ${project.version}
 description: System for logging a player's current name and UUID and API for retrieving a UUID from a player's name, or vice versa.
 author: smeef
 website: https://github.com/arif-banai
-api-version: 1.15
+api-version: 1.18.1
 
 main: me.arifbanai.idLogger.IDLogger

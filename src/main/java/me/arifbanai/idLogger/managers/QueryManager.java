@@ -1,6 +1,6 @@
 package me.arifbanai.idLogger.managers;
 
-import me.arifbanai.easypool.DataSourceManager;
+import me.arifbanai.easypool.EasyPool;
 import me.arifbanai.easypool.enums.DataSourceType;
 import me.arifbanai.idLogger.interfaces.AsyncQueries;
 import me.arifbanai.idLogger.interfaces.Queries;
@@ -14,11 +14,11 @@ import me.arifbanai.idLogger.interfaces.Queries;
  */
 public abstract class QueryManager implements Queries, AsyncQueries {
 
-    protected final DataSourceManager dataSourceManager;
+    protected final EasyPool pool;
     protected final DataSourceType dataSourceType;
 
-    protected QueryManager(DataSourceManager dataSourceManager) {
-        this.dataSourceManager = dataSourceManager;
-        this.dataSourceType = dataSourceManager.getDataSourceType();
+    protected QueryManager(EasyPool pool) {
+        this.pool = pool;
+        this.dataSourceType = pool.getDataSourceType();
     }
 }

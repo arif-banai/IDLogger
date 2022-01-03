@@ -1,6 +1,6 @@
 package me.arifbanai.idLogger.managers.sql;
 
-import me.arifbanai.easypool.DataSourceManager;
+import me.arifbanai.easypool.EasyPool;
 import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.managers.QueryManager;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
@@ -11,22 +11,17 @@ import java.util.UUID;
 
 public class SqlQueries extends QueryManager {
 
-    public SqlQueries(DataSourceManager dataSourceManager) throws SQLException {
-        super(dataSourceManager);
+    public SqlQueries(EasyPool pool) throws SQLException {
+        super(pool);
         prepareDB();
     }
 
     @Override
     public void prepareDB() throws SQLException {
-        switch(dataSourceType) {
-            case MYSQL:
-                setupMySQL();
-                break;
-            case SQLITE:
-                setupSQLite();
-                break;
-            default:
-                throw new SQLException("Error setting up the data source.");
+        switch (dataSourceType) {
+            case MYSQL -> setupMySQL();
+            case SQLITE -> setupSQLite();
+            default -> throw new SQLException("Error setting up the data source.");
         }
     }
 
@@ -36,7 +31,7 @@ public class SqlQueries extends QueryManager {
     public List<LoggedPlayer> getAllLoggedPlayers() throws SQLException {
         String getAllPlayersSQL = "SELECT playerUUID, playerName FROM players";
 
-        try(Connection connection = dataSourceManager.getConnection();
+        try(Connection connection = pool.getConnection();
             PreparedStatement ps = connection.prepareStatement(getAllPlayersSQL)
         )   {
             try(ResultSet rs = ps.executeQuery()) {
@@ -49,7 +44,7 @@ public class SqlQueries extends QueryManager {
     public String getNameByUUID(String playerUUID) throws SQLException, PlayerNotIDLoggedException {
         String getNameByUUIDSQL = "SELECT playerName FROM players WHERE playerUUID = ?";
 
-        try(Connection connection = dataSourceManager.getConnection();
+        try(Connection connection = pool.getConnection();
             PreparedStatement ps = connection.prepareStatement(getNameByUUIDSQL)
         )  {
             ps.setString(1, playerUUID);
@@ -63,7 +58,7 @@ public class SqlQueries extends QueryManager {
     public String getUUIDByName(String playerName) throws SQLException, PlayerNotIDLoggedException {
         String getUUIDByNameSQL = "SELECT playerUUID FROM players WHERE playerName = ?";
 
-        try(Connection connection = dataSourceManager.getConnection();
+        try(Connection connection = pool.getConnection();
             PreparedStatement ps = connection.prepareStatement(getUUIDByNameSQL)
         )  {
             ps.setString(1, playerName);
@@ -78,7 +73,7 @@ public class SqlQueries extends QueryManager {
     @Override
     public void addPlayer(UUID playerUUID, String playerName) throws SQLException {
         String addPlayerSQL = "INSERT INTO players(playerUUID,playerName) VALUES(?,?)";
-        try(Connection connection = dataSourceManager.getConnection();
+        try(Connection connection = pool.getConnection();
             PreparedStatement ps = connection.prepareStatement(addPlayerSQL)
         )  {
             ps.setString(1, playerUUID.toString());
@@ -90,7 +85,7 @@ public class SqlQueries extends QueryManager {
     @Override
     public void removePlayer(String playerUUID) throws SQLException {
         String deletePlayerSQL = "DELETE FROM players WHERE playerUUID = ?";
-        try(Connection connection = dataSourceManager.getConnection();
+        try(Connection connection = pool.getConnection();
             PreparedStatement ps = connection.prepareStatement(deletePlayerSQL)
         )  {
             ps.setString(1, playerUUID);
@@ -101,7 +96,7 @@ public class SqlQueries extends QueryManager {
     @Override
     public void updatePlayerName(UUID playerUUID, String playerName) throws SQLException {
         String updatePlayerNameSQL = "UPDATE players SET playerName = ? WHERE playerUUID = ?";
-        try(Connection connection = dataSourceManager.getConnection();
+        try(Connection connection = pool.getConnection();
             PreparedStatement ps = connection.prepareStatement(updatePlayerNameSQL)
         )  {
             ps.setString(1, playerName);
@@ -120,7 +115,7 @@ public class SqlQueries extends QueryManager {
                 + "KEY (playerName)"
                 + ");";
 
-        try(Connection connection = dataSourceManager.getConnection();
+        try(Connection connection = pool.getConnection();
             Statement statement = connection.createStatement();
         ) {
             statement.executeUpdate(createTable);
@@ -137,7 +132,7 @@ public class SqlQueries extends QueryManager {
         String createIndex = "CREATE INDEX IF NOT EXISTS indexNames on players (playerName);";
 
 
-        try (Connection connection = dataSourceManager.getConnection();
+        try (Connection connection = pool.getConnection();
              Statement statement = connection.createStatement();
         ) {
             statement.executeUpdate(createTable);

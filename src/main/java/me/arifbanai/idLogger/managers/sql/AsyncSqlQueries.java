@@ -1,6 +1,6 @@
 package me.arifbanai.idLogger.managers.sql;
 
-import me.arifbanai.easypool.DataSourceManager;
+import me.arifbanai.easypool.EasyPool;
 import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
@@ -11,11 +11,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-public class SqlQueryManager extends SqlQueries {
+public class AsyncSqlQueries extends SqlQueries {
 
     private final JavaPlugin plugin;
 
-    public SqlQueryManager(JavaPlugin plugin, DataSourceManager dataSourceManager) throws SQLException {
+    public AsyncSqlQueries(JavaPlugin plugin, EasyPool dataSourceManager) throws SQLException {
         super(dataSourceManager);
         this.plugin = plugin;
     }

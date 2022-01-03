@@ -12,7 +12,7 @@ Build and install to your local maven repo, then add the dependency
 <dependency>
     <groupId>me.arifbanai</groupId>
     <artifactId>idlogger</artifactId>
-    <version>2.0</version>
+    <version>2.2</version>
 </dependency>
 ```
 
@@ -33,19 +33,23 @@ UUID playerUUID = idLogger.doUUIDLookup(String playerName);
 
 I made this for my own use in another plugin when I was updating my plugin to use UUIDs for the 1.8 update, which no longer made a username unique, instead being replaced by a Universally Unique Identifier, or UUID.
 
-The current version officially supports 1.16.5, and has been updated to use BukkitScheduler to perform async tasks, which should help improve performance on any server that makes use of multiple threads.
+The current version was compiled using Java 17 and targets spigot 1.18.1
 
 **Dependency for:** [vShop3.0 (aka vShop Remastered)](https://github.com/arif-banai/vShop3.0)
 
-The plugin stores the players UUID and name upon joining the server. 
+The plugin stores the player's UUID and name upon joining the server. 
 If the player's name is different from the one recorded in the DB, the DB is updated with the new name.
 
 This plugin can utilize a MySQL or SQLite DB, as configurable in config.yml, to store these records.
 
 ## TODO
-* Implement caching of UUID/name pair for player's who have recently played to reduce DB calls.
+* Improve the cache system
 
 **Changelog**
+
+- **1/02/2022**
+  - Happy new year!
+  - Refactoring and updating api versions
 
 - **2/11/2021**
   - Added comment explaining usage of "hikari.configurationFile" system property

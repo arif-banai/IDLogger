@@ -2,15 +2,15 @@ package me.arifbanai.idLogger;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import me.arifbanai.easypool.DataSourceManager;
-import me.arifbanai.easypool.MySQLDataSourceManager;
-import me.arifbanai.easypool.SQLiteDataSourceManager;
-import me.arifbanai.easypool.enums.DataSourceType;
+import me.arifbanai.easypool.EasyPool;
+import me.arifbanai.easypool.MariaDB;
+import me.arifbanai.easypool.MySQL;
+import me.arifbanai.easypool.SQLite;
 import me.arifbanai.idLogger.exceptions.PlayerNotIDLoggedException;
 import me.arifbanai.idLogger.interfaces.IDLoggerCallback;
 import me.arifbanai.idLogger.listeners.PlayerJoinListener;
 import me.arifbanai.idLogger.managers.QueryManager;
-import me.arifbanai.idLogger.managers.sql.SqlQueryManager;
+import me.arifbanai.idLogger.managers.sql.AsyncSqlQueries;
 import me.arifbanai.idLogger.objects.LoggedPlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.HandlerList;
@@ -19,11 +19,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * The main class for this plugin. Also the listener for all events processed by this plugin.
+ * The main class for this plugin.
  * <p>
  * Two players are not allowed to have the same username.
  * However, a player is allowed to change their username.
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
  */
 public class IDLogger extends JavaPlugin {
 
-	private DataSourceManager dataSourceManager;
+	private EasyPool pool;
 	private QueryManager queryManager;
 
 	//TODO Add some "lastOnline" field to the DB to reduce the initial size of {@link #playersByUUID}
@@ -53,7 +54,7 @@ public class IDLogger extends JavaPlugin {
 		System.setProperty("hikaricp.configurationFile", path + "/hikari.properties");
 
 		try {
-			setupDsmAndQueryManager();
+			setupPoolAndQueryManager();
 		} catch (SQLException | IOException exception) {
 			handleUnexpectedException(exception);
 		}
@@ -66,7 +67,7 @@ public class IDLogger extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getLogger().info("Disabling plugin...");
-		dataSourceManager.close();
+		pool.close();
 		HandlerList.unregisterAll(this);
 	}
 
@@ -82,7 +83,7 @@ public class IDLogger extends JavaPlugin {
 		}
 
 		final String[] name = new String[1];
-		queryManager.doAsyncNameLookup(playerUUID.toString(), new IDLoggerCallback<String>() {
+		queryManager.doAsyncNameLookup(playerUUID.toString(), new IDLoggerCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				name[0] = result;
@@ -90,7 +91,7 @@ public class IDLogger extends JavaPlugin {
 
 			@Override
 			public void onFailure(Exception cause) {
-				if(cause instanceof PlayerNotIDLoggedException) {
+				if (cause instanceof PlayerNotIDLoggedException) {
 					name[0] = "";
 				} else {
 					handleUnexpectedException(cause);
@@ -110,7 +111,7 @@ public class IDLogger extends JavaPlugin {
 	 * Get a player's UUID given their name. Utilizes an in-memory cache using {@link BiMap}.
 	 * @param playerName the name of the player
 	 * @return the UUID associated with playerName
-	 * @throws PlayerNotIDLoggedException if their is no such player
+	 * @throws PlayerNotIDLoggedException if there is no such player
 	 */
 	public UUID doUUIDLookup(String playerName) throws PlayerNotIDLoggedException {
 		BiMap<String, UUID> playersByName = playersByUUID.inverse();
@@ -118,8 +119,8 @@ public class IDLogger extends JavaPlugin {
 			return playersByName.get(playerName);
 		}
 
-		final String[] uuidString = new String[1];
-		queryManager.doAsyncUUIDLookup(playerName, new IDLoggerCallback<String>() {
+		final String[] uuidString = {""};
+		queryManager.doAsyncUUIDLookup(playerName, new IDLoggerCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				uuidString[0] = result;
@@ -127,9 +128,7 @@ public class IDLogger extends JavaPlugin {
 
 			@Override
 			public void onFailure(Exception cause) {
-				if(cause instanceof PlayerNotIDLoggedException) {
-					uuidString[0] = "";
-				} else {
+				if (!(cause instanceof PlayerNotIDLoggedException)) {
 					handleUnexpectedException(cause);
 				}
 			}
@@ -146,41 +145,39 @@ public class IDLogger extends JavaPlugin {
 	 * Setup the DSM with some RDBMS specified in config
 	 * Initialize the {@link QueryManager} with the right DSM implementation
 	 */
-	private void setupDsmAndQueryManager() throws SQLException, IOException {
+	private void setupPoolAndQueryManager() throws SQLException, IOException {
 		FileConfiguration config = getConfig();
-		dataSourceManager = null;
+		pool = null;
 
-		if(config.getBoolean("using-sqlite", true)) {
-			String path = getDataFolder().toPath().toString();
-			dataSourceManager = new SQLiteDataSourceManager(path, this.getName());
-			queryManager = new SqlQueryManager(this, dataSourceManager);
-		} else {
-			String host = config.getString("db.host");
-			String port = config.getString("db.port");
-			String schema = config.getString("db.schema");
-			String user = config.getString("db.username");
-			String password = config.getString("db.password");
-			String dialect = config.getString("db.dialect");
+		String dialect = config.getString("dialect", "sqlite").toLowerCase(Locale.ROOT);
+		String host = config.getString("host", "localhost");
+		String port = config.getString("port", "3306");
+		String schema = config.getString("schema", "schema");
+		String user = config.getString("username", "user");
+		String password = config.getString("password", "password");
 
-			if (dialect == null)  {
-				handleUnexpectedException(new Exception("DB dialect is null"));
-			}
+		switch(dialect) {
+			case "sqlite":
+				String path = getDataFolder().toPath().toString();
+				pool = new SQLite(path, this.getName());
+				queryManager = new AsyncSqlQueries(this, pool);
+				break;
+			case "mysql":
+				pool = new MySQL(host, port, schema, user, password);
+				queryManager = new AsyncSqlQueries(this, pool);
+				break;
+			case "mariadb":
+				pool = new MariaDB(host, port, schema, user, password);
+				queryManager = new AsyncSqlQueries(this, pool);
+			default:
+				handleUnexpectedException(new Exception("Unable to resolve DB dialect"));
+				break;
 
-			// Use a switch to handle multiple sql dialects
-			switch(DataSourceType.matchDialect(dialect)) {
-				case MYSQL:
-					dataSourceManager = new MySQLDataSourceManager(host, port, schema, user, password);
-					queryManager = new SqlQueryManager(this, dataSourceManager);
-					break;
-				default:
-					handleUnexpectedException(new Exception("Unable to resolve DB dialect"));
-					break;
-			}
 		}
 	}
 
 	private void initMap() {
-		queryManager.doAsyncGetAllLoggedPlayers(new IDLoggerCallback<List<LoggedPlayer>>() {
+		queryManager.doAsyncGetAllLoggedPlayers(new IDLoggerCallback<>() {
 			@Override
 			public void onSuccess(List<LoggedPlayer> result) {
 				if(result.size() == 0) {
@@ -188,7 +185,8 @@ public class IDLogger extends JavaPlugin {
 					return;
 				}
 
-				playersByUUID = HashBiMap.create(result.size());
+				//Initial capacity of the HashBiMap should be a bit larger than the
+				playersByUUID = HashBiMap.create(result.size() + 10);
 				playersByUUID.putAll(result.stream().collect(Collectors.toMap(LoggedPlayer::getUuid,
 						LoggedPlayer::getName)));
 			}
